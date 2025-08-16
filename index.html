@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Thank You, My Egyptian Family!</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google Fonts for fun typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Caveat:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #fffbe6 0%, #ffe082 100%);
+      font-family: 'Caveat', 'Fredoka One', cursive, sans-serif;
+      color: #222;
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    #envelope-overlay {
+      background: linear-gradient(135deg, #fffbe6 0%, #ffe082 100%);
+      position: fixed;
+      z-index: 99999;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.7s cubic-bezier(.87,-0.41,.19,1.44);
+      min-height: 100vh;
+      min-width: 100vw;
+    }
+    .envelope-outer {
+      width: min(90vw, 420px);
+      height: min(56vw, 280px);
+      max-width: 420px;
+      max-height: 280px;
+      min-width: 220px;
+      min-height: 150px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      perspective: 1200px;
+    }
+    .envelope-shadow {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      width: 82%;
+      height: 26%;
+      margin: auto;
+      background: radial-gradient(ellipse at center, #0002 60%, transparent 100%);
+      z-index: 0;
+      border-radius: 50%;
+      filter: blur(0.5px);
+      opacity: 0.22;
+      pointer-events: none;
+    }
+    .envelope-flap {
+      position: absolute;
+      left: 0; top: 0;
+      width: 100%;
+      height: 50%;
+      background: linear-gradient(160deg, #ffef9c 0%, #ffd600 100%);
+      clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+      border-top-left-radius: 30px 35px;
+      border-top-right-radius: 30px 35px;
+      z-index: 3;
+      box-shadow: 0 6px 20px #C6282833;
+      transform-origin: 50% 100%;
+      transition: transform 0.95s cubic-bezier(.87,-0.41,.19,1.44);
+      border-bottom: 2.5px solid #ffd600;
+    }
+    .envelope-flap:after {
+      content: "";
+      display: block;
+      position: absolute;
+      left: 50%;
+      top: 70%;
+      width: 60px;
+      height: 15px;
+      background: radial-gradient(ellipse at center, #ffd60099 60%, transparent 100%);
+      transform: translateX(-50%);
+      opacity: 0.38;
+      filter: blur(2px);
+    }
+    .envelope-flap-heart {
+      position: absolute;
+      left: 50%;
+      top: 62%;
+      transform: translate(-50%, -50%);
+      z-index: 4;
+      font-size: 2.6em;
+      filter: drop-shadow(0 2px 6px #ffd60080);
+      pointer-events: none;
+      transition: opacity 0.5s;
+    }
+    .envelope-flap-heart span {
+      animation: heartBeat 2.4s infinite;
+      display: inline-block;
+    }
+    @keyframes heartBeat {
+      0% { transform: scale(1);}
+      25% { transform: scale(1.18);}
+      40% { transform: scale(1);}
+      70% { transform: scale(1.12);}
+      100% { transform: scale(1);}
+    }
+    .envelope-body {
+      position: absolute;
+      left: 0; bottom: 0;
+      width: 100%;
+      height: 62%;
+      background: linear-gradient(0deg, #fffdf6 80%, #ffd600 100%);
+      border-bottom-left-radius: 28px 26px;
+      border-bottom-right-radius: 28px 26px;
+      box-shadow: 0 8px 28px #2221;
+      z-index: 2;
+      border: 3.5px solid #43a047;
+      border-top: none;
+      overflow: hidden;
+    }
+    .envelope-letter {
+      position: absolute;
+      left: 12%;
+      top: 26%;
+      width: 76%;
+      height: 62%;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 18px #ffd60033;
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 1;
+      transition: transform 0.95s cubic-bezier(.87,-0.41,.19,1.44), opacity 0.6s;
+      border: 2px solid #ffd600;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.12em;
+      color: #C62828;
+      text-align: center;
+      padding: 10px 5px;
+      box-sizing: border-box;
+    }
+    .envelope-letter .envelope-msg {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1em;
+      color: #C62828;
+      margin-bottom: 5px;
+      background: #fffbe6cc;
+      border-radius: 8px;
+      padding: 2px 10px;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      display: inline-block;
+    }
+    .envelope-letter .envelope-arabic {
+      font-family: 'Caveat', 'Fredoka One', cursive, sans-serif;
+      font-size: 1.1em;
+      color: #388E3C;
+      direction: rtl;
+      background: #fffbe6cc;
+      border-radius: 8px;
+      padding: 2px 10px;
+      margin-top: 1px;
+      display: inline-block;
+    }
+    .envelope-letter .envelope-emoji {
+      font-size: 2.1em;
+      margin-top: 6px;
+      filter: drop-shadow(0 2px 8px #ffd60066);
+    }
+    #envelope-overlay.open .envelope-flap {
+      transform: rotateX(-120deg);
+    }
+    #envelope-overlay.open .envelope-letter {
+      transform: translateY(-110%) scale(1.06) rotate(-3deg);
+      opacity: 0.96;
+    }
+    #envelope-overlay.open {
+      opacity: 0;
+      pointer-events: none;
+    }
+    @media (max-width:600px) {
+      .card {padding: 1em;}
+      .gallery img {width: 120px;}
+      .sticker {width: 50px;}
+      .envelope-outer {
+        width: 95vw; height: 44vw; min-width:160px; min-height:100px; max-width:320px; max-height:150px;
+      }
+      .envelope-letter {font-size:0.98em;}
+      .envelope-flap-heart {font-size:2em;}
+    }
+    .flipbook {
+      position: relative;
+      width: 100vw;
+      min-height: 100vh;
+      perspective: 1800px;
+      z-index: 1;
+    }
+    .page {
+      background: #fff8ea url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+      border-radius: 20px;
+      max-width: 530px;
+      margin: 2rem auto;
+      box-shadow: 0 10px 32px rgba(0,0,0,0.12);
+      padding: 2.5rem 2.5rem 2rem 2.5rem;
+      position: absolute;
+      left: 0; right: 0;
+      top: 0;
+      min-height: 80vh;
+      width: 90vw;
+      transition: transform 1s cubic-bezier(.77,0,.175,1), opacity 0.7s;
+      backface-visibility: hidden;
+      z-index: 2;
+      overflow: visible;
+    }
+    .page.page-front {
+      transform: rotateY(0deg);
+      opacity: 1;
+      z-index: 3;
+    }
+    .flipbook.flipped .page.page-front {
+      transform: rotateY(-90deg);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .page.page-back {
+      background: #fffefb url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+      transform: rotateY(90deg);
+      opacity: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .flipbook.flipped .page.page-back {
+      transform: rotateY(0deg);
+      opacity: 1;
+      pointer-events: auto;
+      z-index: 4;
+    }
+    .flip-btn {
+      background: #43A047;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 0.6em 1.6em;
+      font-size: 1.1em;
+      cursor: pointer;
+      font-family: 'Fredoka One', cursive;
+      margin-top: 1.5em;
+      margin-bottom: 1.3em;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px #43A04744;
+      position: relative;
+    }
+    .flip-btn:hover {
+      background: #FFD600;
+      color: #222;
+      box-shadow: 0 6px 20px #C6282833;
+      top: -2px;
+    }
+    .flip-btn.back-btn {
+      position: absolute;
+      left: 2em;
+      top: 2em;
+      margin: 0;
+      padding: 0.4em 1.2em;
+      z-index: 10;
+    }
+    .sticker {
+      position: absolute;
+      width: 80px;
+      top: -35px;
+      right: -30px;
+      z-index: 20;
+      pointer-events: none;
+      opacity: 0.96;
+      animation: stickerpop 1.6s;
+      background: #fff8ea;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px #388E3C22;
+    }
+    .flags {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      margin-bottom: 1rem;
+      margin-top: 1.5rem;
+      position: relative;
+    }
+    .flags img {
+      height: 54px;
+      border-radius: 8px;
+      border: 2.5px solid #FFD600;
+      background: #fff;
+      box-shadow: 0 2px 12px #FFD60044;
+      margin: 0 7px;
+      transition: transform 0.18s;
+    }
+    .flags img:hover {
+      transform: scale(1.08) rotate(-2deg);
+      box-shadow: 0 5px 24px #FFD60099;
+    }
+    .dot {
+      width: 14px; height: 14px;
+      background: #FFD600;
+      border-radius: 50%;
+      display: inline-block;
+      margin: 0 6px;
+      position: relative;
+      top: 4px;
+      animation: dot-float 2.5s infinite alternate;
+      box-shadow: 0 1px 10px #ffd60044;
+    }
+    .dot2 { animation-delay: 1.1s;}
+    .dot3 { animation-delay: 0.6s;}
+    @keyframes dot-float {
+      0% { transform: translateY(0);}
+      100% { transform: translateY(-8px);}
+    }
+    h1 {
+      font-family: 'Fredoka One', cursive;
+      color: #C62828;
+      margin: 0.25em 0 0.06em 0;
+      font-size: 2.6em;
+      letter-spacing: 0.8px;
+      text-shadow: 0 2px 12px #ffd60044, 0 1px 0 #fff8;
+      background: linear-gradient(90deg, #C62828 60%, #FFD600 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      position: relative;
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+    }
+    .hero-heart {
+      font-size: 2.5em;
+      color: #FFD600;
+      filter: drop-shadow(0 2px 12px #ffd60099);
+      margin-top: 0.1em;
+      margin-bottom: 0.2em;
+      animation: heartBeat 2.6s infinite;
+      display: block;
+      text-align: center;
+      width: 100%;
+    }
+    .arabic {
+      font-family: 'Caveat', cursive;
+      color: #C62828;
+      font-size: 1.2em;
+      margin-bottom: 0.4em;
+      direction: rtl;
+      text-align: center;
+      width: 100%;
+    }
+    .centered-thank {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 100%;
+    }
+    .mexico-egypt {
+      margin-top: 1em;
+      font-size: 1.12em;
+      letter-spacing: 2px;
+      font-family: 'Fredoka One', cursive;
+      background: linear-gradient(90deg, #43A047, #FFD600 30%, #C62828 60%, #388E3C 100%);
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+      font-weight: bold;
+      filter: drop-shadow(2px 2px 6px #fff8ea);
+      text-align: center;
+    }
+    .thanks {
+      margin-top: 1.4em;
+      font-size: 1.2em;
+      color: #388E3C;
+      font-family: 'Caveat', cursive;
+      line-height: 1.4em;
+      text-align: center;
+      width: 100%;
+    }
+    .thanks > div {
+      text-align: center;
+      margin-bottom: 0.5em;
+      font-size: 1.08em;
+      color: #366d19;
+      font-family: 'Caveat', cursive;
+    }
+    .thanks .arabic {
+      color: #b02e2e;
+      font-size: 1.12em;
+      font-family: 'Caveat', 'Fredoka One', cursive, sans-serif;
+      margin-top: 0.7em;
+      margin-bottom: 1.1em;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+    .memories-title {
+      margin-top: 2.1em;
+      margin-bottom: 0.2em;
+      font-family: 'Caveat', cursive;
+      font-size: 1.45em;
+      color: #34302d;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      text-align: center;
+      width: 100%;
+      display: block;
+    }
+    .arabic-memories {
+      margin-bottom: 0.7em;
+      color: #b02e2e;
+      font-size: 1.08em;
+      font-family: 'Caveat', 'Fredoka One', cursive, sans-serif;
+      direction: rtl;
+      text-align: center;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      width: 100%;
+    }
+    .memory-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1em;
+      justify-content: center;
+      margin-top: 1em;
+    }
+    .memory-btn {
+      background: #C62828;
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      padding: 0.7em 1.4em;
+      font-size: 1em;
+      cursor: pointer;
+      font-family: 'Fredoka One', cursive;
+      margin-bottom: 0.2em;
+      position: relative;
+      transition: background 0.2s;
+      box-shadow: 0 2px 8px #2222;
+    }
+    .memory-btn:hover {
+      background: #FFD600;
+      color: #222;
+      top: -2px;
+      box-shadow: 0 6px 20px #C6282833;
+    }
+    .memory-popup {
+      display: none;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 6px 24px #2223;
+      padding: 1.2em;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 90vw;
+      max-width: 400px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: translate(-50%, -50%);
+      z-index: 999;
+      text-align: left;
+      animation: popin 0.4s;
+    }
+    @keyframes popin {
+      0% { transform: translate(-50%, -60%) scale(0.5);}
+      100% { transform: translate(-50%, -50%) scale(1);}
+    }
+    .popup-close {
+      position: sticky;
+      top: 10px;
+      float: right;
+      right: 0;
+      font-size: 1.6em;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #C62828;
+      z-index: 1000;
+      font-weight: bold;
+      margin-left: auto;
+      display: block;
+    }
+    .gallery {
+      margin: 2em 0 1em 0;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 18px;
+    }
+    .gallery img {
+      width: 220px;
+      border-radius: 16px;
+      border: 4px solid #FFD600;
+      margin: 0 6px;
+      box-shadow: 0 4px 16px #2223;
+      transition: transform 0.2s;
+      cursor: pointer;
+      background: #fff;
+      object-fit: cover;
+      aspect-ratio: 3/4;
+      max-height: 340px;
+    }
+    .gallery img:hover {
+      transform: scale(1.08) rotate(-2deg);
+      border-color: #C62828;
+    }
+    .gallery .main-family-photo {
+      width: 340px;
+      max-width: 92vw;
+      max-height: 440px;
+      min-width: 190px;
+      min-height: 160px;
+      aspect-ratio: 4/3;
+      border-width: 6px;
+      border-color: #43A047;
+      box-shadow: 0 8px 32px #388E3C33;
+      margin-bottom: 1em;
+      cursor: pointer;
+      order: -1;
+      transition: transform 0.23s, border-color 0.15s;
+    }
+    .gallery .main-family-photo:hover {
+      transform: scale(1.05) rotate(-1.5deg);
+      border-color: #FFD600;
+    }
+    .shine {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .shine span {
+      position: absolute;
+      width: 8px; height: 8px;
+      background: #FFD600;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: shineMove 2.4s infinite;
+    }
+    @keyframes shineMove {
+      0% { opacity: 0.5; transform: scale(0.6);}
+      50% { opacity: 1; transform: scale(1.4);}
+      100% { opacity: 0.2; transform: scale(0.6);}
+    }
+    @media (max-width:700px) {
+      .page {padding: 1em;}
+      .gallery img {width: 48vw; max-width: 185px; min-width:110px;}
+      .gallery .main-family-photo {width: 95vw; max-width: 97vw; min-width: 120px; min-height: 80px;}
+      .sticker {width: 50px;}
+      .gallery {gap: 7px;}
+      .memory-popup {max-width: 99vw;}
+      .flags img {height: 38px;}
+      .memories-title {font-size:1em;}
+      h1 {font-size:1.6em;}
+    }
+    @media (max-width:410px) {
+      .memory-popup {padding: 0.5em;}
+    }
+  </style>
+</head>
+<body>
+  <div id="envelope-overlay">
+    <div class="envelope-outer" id="envelope-trigger">
+      <div class="envelope-shadow"></div>
+      <div class="envelope-flap">
+        <div class="envelope-flap-heart"><span>❤️</span></div>
+      </div>
+      <div class="envelope-body"></div>
+      <div class="envelope-letter">
+        <div class="envelope-msg">Click to open!</div>
+        <div class="envelope-arabic">اضغط هنا علشان تفتح</div>
+        <div class="envelope-emoji">✉️</div>
+      </div>
+    </div>
+  </div>
+  <div class="flipbook">
+    <div class="page page-front" id="page-front">
+      <img class="sticker" src="img/afs.png" alt="AFS Logo">
+      <div class="shine">
+        <span style="top:18px;left:45px;"></span>
+        <span style="top:30px;left:90px;"></span>
+        <span style="top:60px;left:300px;"></span>
+        <span style="top:120px;left:410px;"></span>
+        <span style="top:140px;left:160px;"></span>
+      </div>
+      <div class="flags">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Flag_of_Egypt.svg" alt="Egypt flag">
+        <span class="dot"></span>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/f/fc/Flag_of_Mexico.svg" alt="Mexico flag" id="mexico-flag">
+      </div>
+      <span class="dot dot2" style="position:absolute;left:120px;top:18px;"></span>
+      <span class="dot dot3" style="position:absolute;right:120px;top:18px;"></span>
+      <div class="centered-thank">
+        <h1>Thank You, My Egyptian Family!</h1>
+        <div class="hero-heart">❤️</div>
+        <div class="arabic">شكراً ليكم يا عيلتي المصرية!</div>
+        <div class="mexico-egypt">Mexico 🇲🇽 & Egypt 🇪🇬</div>
+      </div>
+      <audio id="music" src="music/photograph.mp3"></audio>
+      <div class="thanks">
+        <div>
+          Thank you for welcoming me into your home and heart during my exchange in Egypt.<br>
+          Every moment with you was special and unforgettable.
+        </div>
+        <div class="arabic">
+          شكراً ليكم انكم استقبلتوني في بيتكم وقلبكم في فترة التبادل في مصر.<br>
+          كل لحظة معاكم كانت مميزة ومش ممكن تتنسي.
+        </div>
+      </div>
+      <div class="memories-title">Best Memories <span style="font-size:1.2em;">🌟</span></div>
+      <div class="arabic-memories">أحلى الذكريات</div>
+      <div class="memory-list">
+        <button class="memory-btn" onclick="showMemory('khan')">Khan el Khalili & Perfumes</button>
+        <button class="memory-btn" onclick="showMemory('fifa')">Playing FIFA with Yassien</button>
+        <button class="memory-btn" onclick="showMemory('mexicanfood')">Mexican Food Night</button>
+        <button class="memory-btn" onclick="showMemory('roblox')">Roblox Games with Laila</button>
+        <button class="memory-btn" onclick="showMemory('alia')">Exchange Talks with Alia</button>
+        <button class="memory-btn" onclick="showMemory('momfood')">Mama's Delicious Food</button>
+        <button class="memory-btn" onclick="showMemory('hi5')">Hi5 with Noah <span class="hi5-emoji">🖐️</span></button>
+        <button class="memory-btn" onclick="showMemory('dadfootball')">Football Talks with Dad</button>
+        <button class="memory-btn" onclick="showMemory('mall')">Mall Adventures with Yassien</button>
+        <button class="memory-btn" onclick="showMemory('club')">Club Discoveries</button>
+        <button class="memory-btn" onclick="showMemory('fries')">Eating Lots of Fries 🍟</button>
+      </div>
+      <button class="flip-btn" id="to-gallery">Go to Gallery →</button>
+    </div>
+    <div class="page page-back" id="page-back">
+      <button class="flip-btn back-btn" id="to-front">← Back</button>
+      <h3 style="margin-top:4.5em; margin-bottom: 1.1em; font-family:'Caveat',cursive; font-size:1.3em; color:#444; text-align:center;">
+        <span id="gallery-title" style="cursor:pointer;">Photo Gallery</span>
+        <span id="gallery-emoji" style="font-size:1.1em; cursor:pointer;">📸</span>
+      </h3>
+      <audio id="music-gallery" src="music\heart.mp3"></audio>
+      <div class="gallery">
+        <img 
+          src="img/elles.jpeg" 
+          alt="Family Photo" 
+          class="main-family-photo" 
+          id="main-family-photo"
+          onclick="showMemory('familymain')"
+        >
+        <img src="img/ellos.jpeg" alt="Memory 1" onclick="showMemory('khan')">
+        <img src="img/golden.jpeg" alt="Memory 1">
+        <img src="img/choco.jpeg" alt="Memory 2">
+        <img src="img/origi.jpeg" alt="Memory 3">
+        <img src="img/yassclub.jpeg" alt="Memory 4">
+        <img src="img/papas1.jpeg" alt="Memory 5">
+        <img src="img/señor.jpeg" alt="Memory 6">
+        <img src="img/suzuki.jpeg" alt="Memory 7">
+        <img src="img/ida.jpeg" alt="Memory 8">
+        <img src="img/pira.jpeg" alt="Memory 9">
+        <img src="img/ramen.jpeg" alt="Memory 10">
+        <img src="img/cafeanti.jpeg" alt="Memory 11">
+        <img src="img/kosahry.jpeg" alt="Memory 12">
+        <img src="img/golden1.jpeg" alt="Memory 13">
+        <img src="img/rblx.png" alt="Memory 14">
+      </div>
+    </div>
+  </div>
+  <div id="popup" class="memory-popup"></div>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      var overlay = document.getElementById('envelope-overlay');
+      var trigger = document.getElementById('envelope-trigger');
+      trigger.addEventListener('click', function() {
+        overlay.classList.add('open');
+        setTimeout(function() {
+          overlay.style.display = 'none';
+        }, 990);
+      });
+
+      document.getElementById("mexico-flag").addEventListener("click", function() {
+        var music = document.getElementById("music");
+        music.play();
+      });
+
+      var flipbook = document.querySelector('.flipbook');
+      var toGallery = document.getElementById('to-gallery');
+      var toFront = document.getElementById('to-front');
+      toGallery.addEventListener('click', function() {
+        flipbook.classList.add('flipped');
+      });
+      toFront.addEventListener('click', function() {
+        flipbook.classList.remove('flipped');
+      });
+
+      function playGallerySong() {
+        var musicGallery = document.getElementById("music-gallery");
+        if (musicGallery) {
+          musicGallery.currentTime = 0;
+          musicGallery.play();
+        }
+      }
+      document.getElementById("gallery-title").addEventListener("click", playGallerySong);
+      document.getElementById("gallery-emoji").addEventListener("click", playGallerySong);
+    });
+
+    const memories = {
+      familymain: {
+        en: "I will always be grateful for everything. You will always be in my heart. This is not a goodbye, but a see you later.<br><br><b>Thank you for being my family!</b>",
+        ar: "هفضل دايمًا ممتن ليكم على كل حاجة. أنتم دايمًا في قلبي. ده مش وداع، دي مجرد بداية جديدة.<br><br><b>شكراً لأنكم كنتوا عيلتي!</b>",
+        img: "img/elles.jpeg"
+      },
+      khan: {
+        en: "When we went to Khan el Khalili and I bought so many things, like perfumes. I loved the colors, the smells, and sharing the moment with you.<br><br><b>شكراً على الذكرى الحلوة دي!</b>",
+        ar: "لما رحنا خان الخليلي واشتريت حاجات كتير زي البرفانات. حبيت الألوان والروائح ومشاركتكم اللحظة.<br><br><b>Thank you for this awesome memory!</b>",
+        img: "img/ellos.jpeg"
+      },
+      fifa: {
+        en: "Playing FIFA with Yassien and winning every day! Your competitive spirit made the games so much fun.<br><br><b>حبيت اللعب معاك!</b>",
+        ar: "لعب فيفا مع ياسين وكسبت كل يوم! روحك التنافسية خلت اللعب ممتع.<br><br><b>Loved playing with you!</b>",
+        img: "img/ifa.jpeg"
+      },
+      mexicanfood: {
+        en: "Cooking Mexican food for everyone and sharing my culture with you. The taste of home, far from home.<br><br><b>شكراً انكم جربتوا أكلي!</b>",
+        ar: "طبخت أكل مكسيكي للكل وشاركتكم ثقافتي. طعم الوطن بعيد عن الوطن.<br><br><b>Thank you for trying my food!</b>",
+        img: "img/chilaquile.jpeg"
+      },
+      roblox: {
+        en: "Roblox games with Laila, our laughter and teamwork made every game unforgettable.<br><br><b>ذكريات جامدة!</b>",
+        ar: "ألعاب روبلوكس مع ليلى وضحكنا وتعاوننا خلى كل لعبة لا تتنسي.<br><br><b>Awesome memories!</b>",
+        img: "img/herma2.jpeg"
+      },
+      alia: {
+        en: "Exchange talks with Alia, sharing our dreams and experiences from Mexico and Egypt.<br><br><b>شكراً على الكلام الجميل!</b>",
+        ar: "قعدات التبادل مع عليا ومشاركة أحلامنا وتجاربنا من مصر والمكسيك.<br><br><b>Thank you for the deep talks!</b>",
+        img: "img/herma1.jpeg"
+      },
+      momfood: {
+        en: "Mama’s delicious food – every meal was a new adventure. Thank you for taking care of me.<br><br><b>أكل ماما كان تحفة!</b>",
+        ar: "أكل ماما الجميل – كل أكلة كانت مغامرة جديدة. شكراً على اهتمامك بيا.<br><br><b>Loved your food, Mama!</b>",
+        img: "img/mamacocina.jpeg"
+      },
+      hi5: {
+        en: "Hi5s and 'chócala' with Noah! Our little celebrations made every day brighter.<br><br><b>أحلى لحظاتنا!</b>",
+        ar: "هاي فايف مع نوح! احتفالاتنا الصغيرة خلت كل يوم أروع.<br><br><b>Our best moments!</b>",
+        img: "img/h55.jpeg"
+      },
+      dadfootball: {
+        en: "Football talks with Dad and spending so much money! Thank you for sharing your passion and stories.<br><br><b>ذكريات مش ممكن تتنسي!</b>",
+        ar: "كلام الكورة مع بابا وصرفنا كتير! شكراً على شغفك وقصصك.<br><br><b>Unforgettable memories!</b>",
+        img: "img/fucho.jpeg"
+      },
+      mall: {
+        en: "Mall adventures with Yassien and spending a lot of money! Shopping and exploring together was so much fun.<br><br><b>تجارب جامدة!</b>",
+        ar: "مغامرات المول مع ياسين وصرفنا كتير! الشوبينج والاكتشاف معاكم كان ممتع قوي.<br><br><b>Great experiences!</b>",
+        img: "img/moll.jpeg"
+      },
+      club: {
+        en: "Discovering the club and getting to know everything! Thank you for showing me your world.<br><br><b>حبيت النادي!</b>",
+        ar: "اكتشفت النادي وعرفت كل حاجة! شكراً على انك وريني عالمك.<br><br><b>Loved the club!</b>",
+        img: "img/club.jpeg"
+      },
+      fries: {
+        en: "Eating lots of delicious fries! Thank you for sharing your favorite snacks.<br><br><b>بحب البطاطس!</b>",
+        ar: "أكلت بطاطس كتير معاكم! شكراً انكم شاركتوني سناكسكم المفضلة.<br><br><b>Loved the fries!</b>",
+        img: "img/papas1.jpeg"
+      }
+    };
+
+    function showMemory(key) {
+      const popup = document.getElementById('popup');
+      const mem = memories[key];
+      if (!mem) return;
+      popup.innerHTML = `
+        <button class="popup-close" onclick="closePopup()">×</button>
+        <h2 style="color:#43A047;">${key === 'familymain' ? 'Family' : key.replace(/([a-z])([A-Z])/g, '$1 $2')}</h2>
+        <img src="${mem.img}" style="width:100%;border-radius:12px;margin-bottom:1em;max-height:250px;object-fit:cover;">
+        <div style="margin-bottom:0.8em;">${mem.en}</div>
+        <div class="arabic">${mem.ar}</div>
+      `;
+      popup.style.display = "block";
+      popup.scrollTop = 0;
+    }
+
+    function closePopup() {
+      document.getElementById('popup').style.display = "none";
+    }
+  </script>
+</body>
+</html>
